@@ -1,0 +1,14 @@
+
+
+** mediation model using FIML for sample with resilience values (n=1756) **
+
+* exerSUM = sum of exercise vaariables for 53 (exer99x) and 60-64 (exer09x) *
+
+sem (sex sep -> r, ) (sex sep -> exerSUM, ) (sex exerSUM -> r, ) if(r!=.), method(mlmv) nocapslatent
+estat teffects
+
+* socsupSUM = sum of social support indices  for 53  and 60-64  *
+
+sem (sex sep -> r, ) (sex sep -> socsupSUM, ) (sex socsupSUM -> r, ) if(r!=.), method(mlmv) nocapslatent
+estat teffects
+
