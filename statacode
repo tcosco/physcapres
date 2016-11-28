@@ -763,6 +763,7 @@ egen socsupTOTinc = rmean(`SOCSUPTOT')
 * listwise delete*
 
 gen socsupTOT = ( visitIX+  numberIX+ helpIX+ socIX+ confideIX+ confmoreIX + marIX+ marIX09+ dsspIX+ rlosIX+ frprIX+ frwrIX + visitIX09+  numberIX09+ helpIX09+ socIX09+ confideIX09+ confmoreIX09 +  dsspIX09+ rlosIX09+ frprIX09+ frwrIX09 + hobbyIX + hobbyIX09 + feelIX+ feelIX09)/26
+gen socsupSUM =  visitIX+  numberIX+ helpIX+ socIX+ confideIX+ confmoreIX + marIX+ marIX09+ dsspIX+ rlosIX+ frprIX+ frwrIX + visitIX09+  numberIX09+ helpIX09+ socIX09+ confideIX09+ confmoreIX09 +  dsspIX09+ rlosIX09+ frprIX09+ frwrIX09 + hobbyIX + hobbyIX09 + feelIX+ feelIX09
 
 * strcutural only *
 
@@ -771,6 +772,7 @@ local STRSOCSUPTOT "visitIX  numberIX marIX marIX09 visitIX09  numberIX09 "
 egen strsocsupTOTinc = rmean(`STRSOCSUPTOT')
 * listwise delete*
 gen strsocsupTOT = (visitIX  + numberIX +marIX +marIX09+ visitIX09  + numberIX09 )/6
+gen strsocsupSUM = visitIX  + numberIX +marIX +marIX09+ visitIX09  + numberIX09 
 
 * functional only*
 
@@ -779,6 +781,7 @@ local FUNSOCSUPTOT " helpIX socIX confideIX confmoreIX dsspIX rlosIX frprIX frwr
 egen funsocsupTOTinc = rmean(`STRSOCSUPTOT')
 * listwise delete*
 gen funsocsupTOT = (helpIX+ socIX+ confideIX+ confmoreIX + dsspIX+ rlosIX+ frprIX+ frwrIX+ helpIX09+ socIX09+ confideIX09+ confmoreIX09 + dsspIX09+ rlosIX09+ frprIX09+ frwrIX09+ hobbyIX + hobbyIX09 + feelIX+ feelIX09)/20
+gen funsocsupSUM = helpIX+ socIX+ confideIX+ confmoreIX + dsspIX+ rlosIX+ frprIX+ frwrIX+ helpIX09+ socIX09+ confideIX09+ confmoreIX09 + dsspIX09+ rlosIX09+ frprIX09+ frwrIX09+ hobbyIX + hobbyIX09 + feelIX+ feelIX09
 
 * positive functional items *
 
@@ -788,6 +791,7 @@ egen posfunTOTinc = rmean(`POSFUNTOT')
 * listwise delete*
 
 gen posfunTOT = ( helpIX+ socIX+ confideIX +helpIX09+ socIX09+ confideIX09 + hobbyIX + hobbyIX09 + feelIX+ feelIX09)/10
+gen posfunSUM =  helpIX+ socIX+ confideIX +helpIX09+ socIX09+ confideIX09 + hobbyIX + hobbyIX09 + feelIX+ feelIX09
 
 * negative functional items *
 
@@ -796,6 +800,7 @@ local NEGFUNTOT "  confmoreIX dsspIX rlosIX frprIX frwrIX   confmoreIX09 dsspIX0
 egen negfunTOTinc = rmean(`NEGFUNTOT')
 * listwise delete*
 gen negfunTOT = ( dsspIX+ rlosIX+ frprIX+ frwrIX + dsspIX09+ rlosIX09+ frprIX09+ frwrIX09+ confmoreIX+ confmoreIX09)/10
+gen negfunSUM =  dsspIX+ rlosIX+ frprIX+ frwrIX + dsspIX09+ rlosIX09+ frprIX09+ frwrIX09+ confmoreIX+ confmoreIX09
 
 
 ***** SPLITTING ALL THE SOC SUP VARIABLES INTO QUARTILES * they're non-normal, so they can be analysis here 
