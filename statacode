@@ -1,0 +1,1130 @@
+*Generating a set of CONTSUM variables for 09 (using similar approach to that applied in 1999) */
+*2015 - Rachel Cooper (based on Lizzie Wloch's code with amendments)*/
+*11.2015 - TDC - Resilience project 
+
+set more off 
+
+label define sex 2 "Female" 1 "Male"
+label values sex sex
+
+
+
+
+*****************************
+********* EDUCATION *********
+*****************************
+
+* cleaning unknown and died *
+recode lhqr (0=1)(1/2=2) (3/5=3) (6/8=4)(9/10=.), gen(edu)
+label define edlab 1 "None" 2 "Vocational course, proficiency only OR Sub GCE or sub Burnham C" 3 "GCE 'O' level or Burnham C OR GCE 'A' Level or Burnham B OR Burnham A2" 4 "1st degree or higher"
+label values edu edlab 
+recode edu (1/2=1) (3/4=0), gen(lowedu)
+recode edu (1/2=0)(3/4=1), gen(hedu)
+
+recode lhqr (0/2=1) (3=2) (4/5=3) (6/8=4) (9/10=.), gen(educ26g)
+label var educ26g "Educational level attained (5 cat)"
+label define edulab 1 "None/Sub-GCE" 2 "O-level" 3 "A level or equiv" 4 "Degree or higher"
+label values educ26g edulab
+
+
+* participant's mother's education *
+
+recode med (1=1) (2=2) (3/6=3) (7/8=4)(9/10=.), gen(MAedu)
+recode MAedu (-9899=.)
+label var MAedu "Mothers educational level"
+label define medlab 1 "primary only" 2 "primary and further ed (no quals attained)" 3 "secondary only or primary and further/higher ed" 4 "secondary and higher"
+label values MAedu medlab
+recode MAedu (1/2=1) (3/4=0), gen(lowMAedu)
+
+
+* participant's father's education *
+
+recode fed (3/6=3) (7/8=4), gen(FAedu)
+recode FAedu (-9899=.)
+label var FAedu "Fathers educational level"
+label values FAedu medlab
+recode FAedu (1/2=1) (3/4=0), gen(lowFAedu)
+
+* educational mobility *
+
+* father/participant education mobility *
+
+* mobility based on going from low education, i.e. less than a degree to high *
+gen Fedumob = .
+replace Fedumob = 0 if(lowFAedu==0 & lowedu==1)
+replace Fedumob = 1 if(lowFAedu==1 & lowedu==1)
+replace Fedumob = 2 if(lowFAedu==0 & lowedu==0)
+replace Fedumob = 3 if(lowFAedu==1 & lowedu==0)
+label define sm 0 "downward" 1 "low-low" 2 " high-high" 3 "upward"
+label values Fedumob sm
+
+* using exact values *
+gen Fedumob3 = .
+replace Fedumob3 = 0 if(lowFAedu<lowedu)
+replace Fedumob3 = 1 if(lowFAedu==lowedu)
+replace Fedumob3 = 2 if(lowFAedu>lowedu)
+label define mob3 0 "downward" 1 "lateral" 2 "upward"
+label values Fedumob3 mob3
+
+* mother/participant education mobility *
+* mobility based on going from low education, i.e. less than a degree to high *
+gen Medumob = .
+replace Medumob = 0 if(lowMAedu==0 & lowedu==1)
+replace Medumob = 1 if(lowMAedu==1 & lowedu==1)
+replace Medumob = 2 if(lowMAedu==0 & lowedu==0)
+replace Medumob = 3 if(lowMAedu==1 & lowedu==0)
+label values Medumob sm
+* using exact values *
+gen Medumob3 = .
+replace Medumob3 = 0 if(lowMAedu<lowedu)
+replace Medumob3 = 1 if(lowMAedu==lowedu)
+replace Medumob3 = 2 if(lowMAedu>lowedu)
+label values Medumob3 mob3
+
+*****************************************************************
+******************************************************************
+*** SOCIOECONOMIC INDICATORS ***************************************
+******************************************************************
+*****************************************************************
+
+*Deriving summary variable for participant's SEP in later adult life age 53>43>36
+
+gen sep=.
+replace sep=SC53 if(SC53<7)
+replace sep=sc43 if(SC53>6 & sc43<7)
+replace sep=sc36 if(sc43>6 & SC53>6 & sc36<7)
+replace sep=. if sep==0
+recode sep (6=1)(5=2)(4=3)(3=4)(2=5)(1=6)
+label variable sep "Summary Participant's Adult Social Class"
+label define sep 6 "I Professional" 5 "II Intermediate " 4 "IIINM Skilled (Non-manual)" 3 "IIM Skilled (Manual)" 2 "IV Partly skilled" 1 "V Unskilled"
+label values sep sep
+
+	* sep categories *
+	
+clonevar sepCAT=sep
+recode sepCAT (1/3=1)(4=2)(5/6=3)
+label variable sepCAT "Categorical Participant's Adult Social Class"
+label define sepCAT  3 "I Professional & II Intermediate " 2 "IIINM Skilled (Non-manual" 1 "IIM Skilled (Manual) & V Unskilled & IV Partly skilled"
+label values sepCAT sepCAT	
+
+	* sep binary *
+
+clonevar sepBIN=sep
+recode sepBIN (1/3=0)(4/6=1)
+label variable sepBIN "Binary Participant's Adult Social Class"
+label define sepBIN  1 "Non-manual" 0 "Manual"
+label values sepBIN sepBIN	
+	
+
+*Spouses sep age 15-53 *
+
+gen SPsep=.
+replace SPsep= SPSC1553  if( SPSC1553 <7)
+replace SPsep=. if SPsep==0
+recode SPsep (6=1)(5=2)(4=3)(3=4)(2=5)(1=6)
+label variable SPsep "Summary Spouse's Adult Social Class"
+label values SPsep sep
+
+	* sep categories *
+	
+clonevar SPsepCAT=SPsep
+recode SPsepCAT (1/2=1)(3=2)(4=3)(5/6=4)
+label variable SPsepCAT "Categorical Spouse's Adult Social Class"
+label values SPsepCAT sepCAT	
+
+	* spouse sep binary *
+
+clonevar SPsepBIN=SPsep
+recode SPsepBIN (1/3=0)(4/6=1)
+label variable SPsepBIN "Binary Spouse's Adult Social Class"
+label values SPsepBIN sepBIN	
+
+
+* participant's father's SEP * 
+
+generate FAsep=.
+replace  FAsep= FSC50
+label variable FAsep "Summary Father's Social Class in Childhood"
+recode FAsep (10=50)(20=40)(30=35)(35=30)(40=20)(50=10)(60=.)
+recode FAsep (50=6)(40=5)(35=4)(30=3)(20=2)(10=1)
+label values FAsep sep
+
+	* sep categories *
+	
+clonevar FAsepCAT=FAsep
+recode FAsepCAT (1/2=1)(3=2)(4=3)(5/6=4)
+label variable FAsepCAT "Categorical Father's Adult Social Class"
+label values FAsepCAT sepCAT	
+
+	* sep binary *
+
+clonevar FAsepBIN=FAsep
+recode FAsepBIN (1/3=0)(4/6=1)
+label variable FAsepBIN "Binary Father's Adult Social Class"
+label values FAsepBIN sepBIN	
+
+
+
+
+***** SOCIAL MOBILITY *****
+
+ * splitting highhigh and lowlow * USED IN ANALYSIS *
+gen sm = .
+replace sm = 0 if(FAsepBIN==1 & sepBIN==0)
+replace sm = 1 if(FAsepBIN==0 & sepBIN==0)
+replace sm = 2 if(FAsepBIN==1 & sepBIN==1)
+replace sm = 3 if(FAsepBIN==0 & sepBIN==1)
+label define sm  1 "Non-manual" 0 "Manual"
+label values sm sm
+
+recode sm (3=0)(2=1)(1=2)(0=3), gen (smrev)
+label define smrev 3 "downward" 2 "low-low" 1 " high-high" 0 "upward"
+label values smrev smrev
+
+*******************************************************************************
+*******************************************************************************
+*******************************************************************************
+******* PHYSICAL CAPABILITY *******************************************************************************
+*******************************************************************************
+*************************************************************/
+
+*Recoding informative missing values to system missing */
+replace grip4max09=. if grip4max09>=776 
+replace grip6max09=. if grip6max09>=776 
+replace chrst09=. if chrst09>=776 
+replace legbc09=. if legbc09>=776 
+replace legbp09=. if legbp09>=776 
+replace tugspeed09x=. if tugspeed09x>=776  
+replace tugtime09x=. if tugtime09x>=776 
+
+replace HT99U=. if HT99U>7776 
+replace htn09=. if htn09>7776 
+
+*Converting htn09 to cm *
+replace htn09=htn09*100 
+
+*Generating a height (cm) variable that takes 09 if available and 99 if not *
+gen height=htn09 
+replace height=HT99U if htn09==. & HT99U!=. 
+
+*CHAIR RISE TIME *
+*to rescale: use equation 1-(time/99th percentile of time) *
+   *99th percentile of time taken = 51.22 seconds*/
+*summ chrst09, d  										
+gen chrst09t=chrst09 
+*assign 99th perctile to those who took longer*/
+replace chrst09t=51.22 if chrst09>51.22 & chrst09<700 	
+*assign value of 51.22s for those unable to complete for health reasons*
+replace chrst09t=51.22 if charstrespd09==3 
+*rescale variable *		
+gen chrstrescale=chrst09t/51.22 						
+gen chrstsum09=1-chrstrescale 										
+
+
+drop chrst09t chrstrescale 
+
+*GRIP STRENGTH
+*to rescale: adjust by dividing by height, then divide by sex specific 99th percentile */
+*Using only height at 09 *
+	*divide grip score by height at 09*
+gen gripadj09=grip6max09/htn09 
+	* male 99th percentile = 0.4261*		
+sum gripadj09 if sex==1,d	
+	* female 99th percentile = 0.2718*			
+sum gripadj09 if sex==2, d			
+	*assign 0.4261 to those with higher value*
+replace gripadj09=0.4261 if sex==1 & gripadj09>0.4261 & gripadj09<888	
+	*assign 0.2718 to those with higher value*
+replace gripadj09=0.2718 if sex==2 & gripadj09>0.2718 & gripadj09<888	
+	*assign value of 0 to those unable to conduct task for health reasons*
+replace gripadj09=0 if grprespd09==3
+	*rescale variable by dividing by sex specific 99th percentile*							
+gen gripsum09=gripadj09													
+replace gripsum09=(gripadj09/0.4261) if sex==1 
+replace gripsum09=(gripadj09/0.2718) if sex==2 
+* summ gripsum09 
+* hist gripsum09, percent 
+
+drop gripadj09 
+
+*Using height at 09 if available and height at 99 if not (so increasing N of gripsum by 2) *
+	*divide grip score by height at 09 or 99*
+gen gripadj09X=grip6max09/height 
+	* male 99th percentile = 0.4261*		
+sum gripadj09X if sex==1,d	
+	* female 99th percentile = 0.2718*			
+sum gripadj09X if sex==2, d		
+	*assign 0.4261 to those with higher value*	
+replace gripadj09X=0.4261 if sex==1 & gripadj09X>0.4261 & gripadj09X<888
+	*assign 0.2718 to those with higher value*
+replace gripadj09X=0.2718 if sex==2 & gripadj09X>0.2718 & gripadj09X<888
+	*assign value of 0 to those unable to conduct task for health reasons*
+replace gripadj09X=0 if grprespd09==3
+	*rescale variable by dividing by sex specific 99th percentile*							
+gen gripsum09X=gripadj09X													
+replace gripsum09X=(gripadj09X/0.4261) if sex==1 
+replace gripsum09X=(gripadj09X/0.2718) if sex==2 
+*summ gripsum09X 
+*hist gripsum09X, percent 
+
+drop gripadj09X 
+
+
+*LEG BALANCE TEST (EYES CLOSED) 
+*to rescale: divide time taken by the maximum possible time *
+	*rescale variable*
+gen legbsum09=legbc09/30 if legbc09<700	
+	*assign value of 0 to those unable to complete task for health reasons (including people who only completed eyes open test*					
+replace legbsum09=0 if balrespd09==3 | balrespd09==-1  
+*summ legbsum09 
+*hist legbsum09, percent 
+
+
+*TIMED GET UP AND GO (TUG) time
+*to rescale: calculate using equation 1-(time/99th percentile of time) * 
+*Note use of tugtime09x whereas Lizzie uses tugtime09 *
+	*99th percentile 17.25 */
+*summ tugtime09x if tugtime09x<700, d		
+gen tugtimet09=tugtime09x 
+	*assign value of 99th percentile for those who took longer*/
+replace tugtimet09=17.25 if tugtime09x>17.25 & tugtime09x<700 	
+	*assign 99th percentile for those unable to complete for health reasons, who used a walking aid or had times>40s*
+replace tugtimet09=17.25 if tugrespd09==3 | tugrespd09==-2 | tugrespd09==-3		
+	 *rescale variable *																			
+gen tugtsum09=(tugtimet09/17.25)   
+gen tugsum09=1-tugtsum09 
+*summ tugsum09 
+*hist tugsum09 
+
+drop tugtsum09 tugtimet09 
+
+*******************************************************************************
+*******************************************************************************
+*GENERATING DIFFERENT VERSIONS OF CONTSUM (WITH AND WITHOUT INCLUSION OF TUG) *
+*******************************************************************************
+*******************************************************************************
+
+* Note: Higher values = better functioning * 
+
+*EQUIVALENT TO 1999 VARIABLES (I.E. WITH INCLUSION OF GRIP, CHAIR RISE AND BALANCE) *
+	*add CHAIR RISE, GRIP AND BALANCE*/ 
+gen cont3sum09 = chrstsum09+gripsum09+legbsum09 				
+*sum cont3sum09 
+*hist cont3sum09 
+label variable cont3sum09 "Summary performance score at age 60-64 (ht09)(GS,CR,BAL)" 
+
+*AS ABOVE (with 09 or 99 height adjusted grip) *
+	*add CHAIR RISE, GRIP AND BALANCE*/ 
+gen cont3sum09X = chrstsum09+gripsum09X+legbsum09 				
+*sum cont3sum09X 
+*hist cont3sum09X 
+label variable cont3sum09X "Summary performance score at age 60-64 (ht09 or 99)(GS,CR,BAL)" 
+
+*WITH INCLUSION OF ALL 4 COMPONENTS (GRIP, CHAIR RISE, BALANCE AND TUG) *
+	*add CHAIR RISE, GRIP, BALANCE AND TUG*/ 
+gen contsum09 = chrstsum09+gripsum09+legbsum09+tugsum09 		
+*sum contsum09 
+*hist contsum09 
+label variable contsum09 "Summary performance score at age 60-64 (ht09)(GS,CR,BAL,TUG)" 
+
+*AS ABOVE (with 09 or 99 height adjusted grip) *
+	*add CHAIR RISE, GRIP, BALANCE AND TUG*
+gen contsum09X = chrstsum09+gripsum09X+legbsum09+tugsum09		 
+*sum contsum09X 
+*hist contsum09X 
+label variable contsum09X "Summary performance score at age 60-64 (ht09 or 99)(GS,CR,BAL,TUG)" 
+
+sum cont3sum09 cont3sum09X contsum09 contsum09X 
+
+
+*** Recoding WEMWBS ***
+
+* cleaning * 
+
+replace WEMWBS09 = . if(WEMWBS09>=98)
+
+
+
+
+
+************************************************************************
+************************************************************************
+*** CREATING AN INVENTORY OF ADLS ******************************************
+************************************************************************
+************************************************************************
+
+* items*
+* difficulty: walking .25 mile, stairs, balance, bending, shopping, heavy housewrork, preparing hot meal, washing face, bathing, dressing, standing, get out of bed, use WC, feeding self *
+
+*** INDEX ***
+
+foreach var of varlist walk09 step09  bend09 hshd09 hhwk09  hck09 face09 bath09 dress09 char09 bed09 wc09 wcuse09 feed09 {
+gen `var'_i = `var'
+recode `var'_i (2/9=.)(0=100)(1=0)   
+label variable `var'_i "`var' index value"
+}
+
+recode grip09 (0=100)(1=50)(2=0), gen(grip09_i)
+ 
+recode ball09 (0=100)(1=66.67)(2=33.33)(3=0), gen(ball09_i)
+
+gen ADLindex = (walk09_i + step09_i + grip09_i  + ball09_i + bend09_i + hshd09_i + hhwk09_i  + hck09_i + face09_i + bath09_i + dress09_i + char09_i + bed09_i + wc09_i + wcuse09_i + feed09_i)/16
+
+*** COUNT ***
+
+foreach var of varlist walk09 step09  bend09 hshd09 hhwk09  hck09 face09 bath09 dress09 char09 bed09 wc09 wcuse09 feed09 {
+gen `var'_c = `var'
+recode `var'_c (2/9=.) 
+label variable `var'_c "`var' count value"
+}
+
+recode grip09 (1/2=1)(4/9=.), gen(grip09_c)
+ 
+recode ball09(1/3=1)(4/9=.), gen(ball09_c)
+
+gen ADLcount = walk09_c + step09_c + grip09_c  + ball09_c + bend09_c + hshd09_c + hhwk09_c  + hck09_c + face09_c + bath09_c + dress09_c + char09_c + bed09_c + wc09_c + wcuse09_c + feed09_c
+
+
+
+* Tertiles of ADL INDEX *
+
+xtile ADLindex3= ADLindex , nq(3)
+
+
+* Tertiles of ADL COUNT, i.e. 0, 1, >=2 *
+
+xtile ADLcount3= ADLcount , nq(3)
+
+
+
+************************************************************************
+************************************************************************
+*** ANALYSIS VARIABLES  ******************************************
+************************************************************************
+************************************************************************
+
+************************
+*** SOCIAL SUPPORT****** 1999 1999
+************************
+************************
+*** SOCIAL SUPPORT****** 1999 1999
+************************************************
+*** SOCIAL SUPPORT****** 1999 1999
+************************************************
+*** SOCIAL SUPPORT****** 1999 1999
+************************
+
+*STRUCURAL SUPPORTS * 
+*STRUCURAL SUPPORTS * 
+*STRUCURAL SUPPORTS * 
+
+
+** how often visit/are visited by friends * 
+
+clonevar visitfr = frndc
+
+recode visitfr (5=100)(4=80)(3=60)(2=40)(1=20), gen (visitIX)
+replace visitIX = 0 if(frndc1==2)
+
+* Are there any relatives or friends with whom you have regular contact, either by visit, telephone or letters? *
+* binary*
+*recode frndc1 (2=0)(9=.), gen(contactfr)
+*recode contactfr (1=100), gen(contactIX)
+
+
+
+*How many friends or relatives do you see once a month or more?*
+
+recode frndr (9=.), gen(numberfr)
+
+recode numberfr (5=100)(4=75)(3=50)(2=25)(1=0), gen (numberIX)
+
+*1	None [How many friends/relatives do you see once a month or more?]
+*2	1-2
+*3	3-5
+*4	6-10
+*5	More than 10
+
+* marital status * 
+
+recode marstat (3/5=0)(1=0)(2=1), gen(marstat1
+recode marstat1 (1=100), gen(marIX)
+
+*FUNCTIONAL SUPPORTS *
+*FUNCTIONAL SUPPORTS *
+*FUNCTIONAL SUPPORTS *
+
+* POSITIVE ITEMS *
+* POSITIVE ITEMS *
+* POSITIVE ITEMS *
+
+
+** 	Do you think that you have friends, neighbours or relatives who would HELP you out if a problem or crisis came up? * 
+
+recode frndh (9=.), gen(helpfr)
+
+recode helpfr (4=100)(3=66.66666)(2=33.333333)(1=0), gen(helpIX)
+
+
+** 	Overall do you wish that you had more of a SOICIAL LIFE, or are thing about right for you, or would you prefer to see less of people? *
+
+recode frndm (9=.), gen(soclife)
+
+recode soclife (2=100)(1=0)(3=0), gen(socIX)
+
+
+* How much in the last 12 months did you CONFIDE in the person you felt closest to?*
+
+recode frcd99 (6/9=.), gen(confide)
+
+recode confide (3=100)(2=66.66666)(1=33.333333), gen(confideIX)
+
+
+
+* How much, in the last 12 months, did you share interests, hobbies and fun with the person you felt closest to? *
+
+recode frsh99 (6/9=.)(-1=.)(1=33.333333)(2=66.6666666)(3=100), gen(hobbyIX)
+
+* How much in the last 12 months did this person make you feel good about yourself? *
+
+recode frfg99 (6/9=.)(3=100)(2=66.66666)(1=33.33333), gen(feelIX)
+
+* NEGATIVE ITEMS *
+* NEGATIVE ITEMS *
+* NEGATIVE ITEMS *
+
+
+* dissapointments by spouse in past year * 1=no*
+
+recode dssp (2=1)(1=0)(3/9=.), gen(dsspIX)
+recode dsspIX (1=100)
+replace dsspIX = 100 if(marstat==0)
+
+* lost contact wiuthg a close friend/relative * 1= no *
+
+recode rlos (1=0)(2=1)(3/9=.)
+
+recode rlos (1=100), gen(rlosIX)
+
+* how much worry/stress did person closest give yo uin past year* 1 = none 0= some *
+
+*recode frpr99 (0=1)(1/3=0)(6/9=.)
+
+recode frpr99 (6/9=.)(0=100)(1=66.66666)(2=33.333333)(3=0), gen(frprIX)
+
+* how much did talking to the perosn you feel closes to to make you feel worse * * 1 = none 0= some *
+
+*recode frwr99 (0=1)(1/3=0)(6/9=.)(-1=.)
+
+recode frwr99 (-1=.)(6/9=.)(0=100)(1=66.66666)(2=33.333333)(3=0), gen(frwrIX)
+
+
+* 	How much in the last 12 months would you have liked to have confided more in the person you felt closest to? *
+
+recode frcm99 (6/9=.), gen(confidemore)
+recode confidemore (3=0)(2=33.333333)(1=66.6666666)(0=100), gen(confmoreIX)
+* if there is noone they've confided in they are given a score of 0 *
+replace confmoreIX = 0 if(frcd99==0)
+
+************************************************************
+* Cumulative score - index - of social support * 1999 1999 1999 1999
+************************************************************
+* Cumulative score - index - of social support * 1999 1999 1999 1999
+************************************************************
+
+
+*total*
+
+* inclusive model*
+local SOCSUP99 "visitIX  numberIX helpIX socIX confideIX confmoreIX  marIX dsspIX rlosIX frprIX frwrIX  hobbyIX  feelIX"
+egen socsupIXinc = rmean(`SOCSUP99')
+* listwise delete*
+gen socsupIX = (visitIX+  numberIX+ helpIX+ socIX+ confideIX+ confmoreIX + marIX+ dsspIX+ rlosIX+ frprIX+ frwrIX + hobbyIX + feelIX)/13
+
+* structural only *
+
+* inclusive model*
+local STRSOCSUP99 "visitIX  numberIX marIX"
+egen strsocsupIXinc = rmean(`STRSOCSUP99')
+* listwise delete*
+gen strsocsupIX = (visitIX  + numberIX +marIX)/3
+
+* functional only*
+
+* inclusive model*
+local FUNSOCSUP99 "helpIX socIX confideIX confmoreIX  dsspIX rlosIX frprIX frwrIX  hobbyIX  feelIX"
+egen funsocsupIXinc = rmean(`FUNSOCSUP99')
+* listwise delete*
+gen funsocsupIX = (helpIX+ socIX+ confideIX+ confmoreIX + dsspIX+ rlosIX+ frprIX+ frwrIX + hobbyIX + feelIX)/10
+
+
+* positive functional  items *
+
+* inclusive model*
+local POSFUN99 "helpIX socIX confideIX  hobbyIX  feelIX"
+egen posfunIXinc = rmean(`POSFUN99')
+* listwise delete*
+gen posfunIX = (hobbyIX + helpIX+ socIX+ confideIX + feelIX)/5
+
+* negative structural items *
+
+* inclusive model*
+local NEGFUN99 "confmoreIX  dsspIX rlosIX frprIX frwrIX"
+egen negfunIXinc = rmean(`NEGFUN99')
+* listwise delete*
+gen negfunIX = ( dsspIX+ rlosIX+ frprIX+ frwrIX + confmoreIX)/5
+
+************************
+*** SOCIAL SUPPORT****** 2009 2009 2009 2009
+************************
+************************
+*** SOCIAL SUPPORT****** 2009 2009 2009 2009
+************************************************
+*** SOCIAL SUPPORT****** 2009 2009 2009 2009
+************************************************
+*** SOCIAL SUPPORT****** 2009 2009 2009 2009
+************************
+
+
+*STRUCURAL SUPPORTS * 
+*STRUCURAL SUPPORTS * 
+*STRUCURAL SUPPORTS * 
+
+** how often visit/are visited by friends * 
+
+clonevar visitfr09 = FRNDC09
+
+recode visitfr09 (7/9=.)(5=100)(4=80)(3=60)(2=40)(1=20), gen (visitIX09)
+replace visitIX09 = 0 if(FRNDC109==2)
+
+* Are there any relatives or friends with whom you have regular contact, either by visit, telephone or letters? *
+* binary*
+*recode FRNDC09 (7/9=.)(1=0)(2=25)(3=50)(4=75)(5=100), gen(contactIX09)
+
+
+* marital status *
+
+recode MARJ09X (2/3=0)(7/9=.), gen(marstat09)
+recode marstat09 (1=100), gen (marIX09)
+
+*How many friends or relatives do you see once a month or more?*
+
+recode FRNDR09 (9=.), gen(numberfr09)
+
+recode numberfr09 (6/9=.)(5=100)(4=75)(3=50)(2=25)(1=0), gen (numberIX09)
+
+*1	None [How many friends/relatives do you see once a month or more?]
+*2	1-2
+*3	3-5
+*4	6-10
+*5	More than 10
+
+** FUNCTIONAL SUPPORTS ***
+** FUNCTIONAL SUPPORTS ***
+** FUNCTIONAL SUPPORTS ***
+
+* POSITIVE ITEMS *
+* POSITIVE ITEMS *
+* POSITIVE ITEMS *
+
+
+
+** 	Do you think that you have friends, neighbours or relatives who would HELP you out if a problem or crisis came up? * 
+
+recode FRNDH09 (9=.), gen(helpfr09)
+
+recode helpfr09 (4=100)(3=66.66666)(2=33.333333)(1=0), gen(helpIX09)
+
+
+** 	Overall do you wish that you had more of a SOICIAL LIFE, or are thing about right for you, or would you prefer to see less of people? *
+
+recode FRNDM09 (9=.), gen(soclife09)
+
+recode soclife09 (2=100)(1=0)(3=0), gen(socIX09)
+
+
+* How much in the last 12 months did you CONFIDE in the person you felt closest to?*
+
+recode FRCD09 (6/9=.), gen(confide09)
+
+recode confide09 (3=100)(2=66.66666)(1=33.333333), gen(confideIX09)
+
+* How much in the last 12 months did this person make you feel good about yourself? *
+
+recode FRFG09 (6/9=.)(3=100)(2=66.66666)(1=33.33333), gen(feelIX09)
+
+
+
+* How much, in the last 12 months, did you share interests, hobbies and fun with the person you felt closest to? *
+
+recode FRSH09 (7/9=.)(-1=.)(1=33.333333)(2=66.6666666)(3=100), gen(hobbyIX09)
+
+* NEGATIVE ITEMS *
+* NEGATIVE ITEMS *
+* NEGATIVE ITEMS *
+
+* dissapointments by spouse in past year * 1=no*
+
+recode DSSP09 (2=1)(1=0)(3/9=.)
+recode DSSP09 (0=100), gen(dsspIX09)
+replace dsspIX09 = 100 if(marstat09==0)
+
+* lost contact wiuthg a close friend/relative * 1= no *
+
+recode RLOS09 (1=0)(2=1)(3/9=.)
+
+recode RLOS09 (0=100), gen(rlosIX09)
+
+* how much worry/stress did person closest give yo uin past year* 1 = none 0= some *
+
+*recode FRPR09 (0=1)(1/3=0)(6/9=.)
+
+recode FRPR09(6/9=.)(0=100)(1=66.66666)(2=33.333333)(3=0), gen(frprIX09)
+
+* how much did talking to the perosn you feel closes to to make you feel worse * * 1 = none 0= some *
+
+*recode FRWR09 (0=1)(1/3=0)(6/9=.)(-1=.)
+
+recode FRWR09 (-1=.)(6/9=.)(0=100)(1=66.66666)(2=33.333333)(3=0), gen(frwrIX09)
+
+* 	How much in the last 12 months would you have liked to have confided more in the person you felt closest to? *
+
+recode FRCM09 (6/9=.), gen(confidemore09)
+
+recode confidemore09 (3=0)(2=33.333333)(1=66.6666666)(0=100), gen(confmoreIX09)
+* if there is noone they've confided in they are given a score of 0 *
+replace confmoreIX09 = 0 if(FRCD09==0)
+
+************************************************************
+* Cumulative score - index - of social support * 2009 2009 2009 2009 
+************************************************************
+* Cumulative score - index - of social support * 2009 2009 2009 2009 
+************************************************************
+
+*total*
+* inclusive model*
+local SOCSUP09 "visitIX09  numberIX09 helpIX09 socIX09 confideIX09 confmoreIX09  marIX09 dsspIX09 rlosIX09 frprIX09 frwrIX09  hobbyIX09  feelIX09"
+egen socsupIX09inc = rmean(`SOCSUP09')
+* listwise delete*
+gen socsupIX09 = ( visitIX09+  numberIX09+ helpIX09+ socIX09+ confideIX09+ confmoreIX09 + marIX09 + dsspIX09+ rlosIX09+ frprIX09+ frwrIX09 + hobbyIX09 + feelIX09)/13
+
+* strcutrual only *
+
+* inclusive model*
+local STRSOCSUP09 "visitIX09  numberIX09 marIX09"
+egen strsocsupIX09inc = rmean(`STRSOCSUP09')
+* listwise delete*
+gen strsocsupIX09 = (visitIX09  + numberIX09 +marIX09)/3
+
+*functional only*
+
+* inclusive model*
+local FUNSOCSUP09 " helpIX09 socIX09 confideIX09 confmoreIX09 dsspIX09 rlosIX09 frprIX09 frwrIX09  hobbyIX09  feelIX09"
+egen funsocsupIX09inc = rmean(`FUNSOCSUP09')
+* listwise delete*
+gen funsocsupIX09 = (helpIX09+ socIX09+ confideIX09+ confmoreIX09 + dsspIX09+ rlosIX09+ frprIX09+ frwrIX09 + hobbyIX09 + feelIX09)/10
+
+
+* positive functional  items *
+
+* inclusive model*
+local POSFUN09 " helpIX09 socIX09 confideIX09 hobbyIX09  feelIX09"
+egen posfunIX09inc = rmean(`POSFUN09')
+* listwise delete*
+gen posfunIX09 = ( helpIX09+ socIX09+ confideIX09 + hobbyIX09 + feelIX09)/5
+
+* negative functional items *
+* inclusive model*
+local NEGFUN09 " confmoreIX09 dsspIX09 rlosIX09 frprIX09 frwrIX09"
+egen negfunIX09inc = rmean(`NEGFUN09')
+* listwise delete*
+gen negfunIX09 = ( dsspIX09+ rlosIX09+ frprIX09+ frwrIX09+ confmoreIX09)/5
+
+
+
+************************************************************************************************************************
+************************************************************************************************************************
+************************************************************************************************************************
+************************************************************************************************************************
+************************************************************************************************************************
+************************************************************
+* CUMULATIVE SOCIAL SUPPORT SCORES FOR 99 AND 09 *
+************************************************************************************************************************
+************************************************************************************************************************
+************************************************************************************************************************
+************************************************************************************************************************
+************************************************************************************************************************
+
+*total*
+
+* inclusive model*
+local SOCSUPTOT "visitIX  numberIX helpIX socIX confideIX confmoreIX  marIX marIX09 dsspIX rlosIX frprIX frwrIX  hobbyIX  feelIX visitIX09  numberIX09 helpIX09 socIX09 confideIX09 confmoreIX09 dsspIX09 rlosIX09 frprIX09 frwrIX09  hobbyIX09  feelIX09"
+egen socsupTOTinc = rmean(`SOCSUPTOT')
+* listwise delete*
+
+gen socsupTOT = ( visitIX+  numberIX+ helpIX+ socIX+ confideIX+ confmoreIX + marIX+ marIX09+ dsspIX+ rlosIX+ frprIX+ frwrIX + visitIX09+  numberIX09+ helpIX09+ socIX09+ confideIX09+ confmoreIX09 +  dsspIX09+ rlosIX09+ frprIX09+ frwrIX09 + hobbyIX + hobbyIX09 + feelIX+ feelIX09)/26
+
+* strcutural only *
+
+* inclusive model*
+local STRSOCSUPTOT "visitIX  numberIX marIX marIX09 visitIX09  numberIX09 "
+egen strsocsupTOTinc = rmean(`STRSOCSUPTOT')
+* listwise delete*
+gen strsocsupTOT = (visitIX  + numberIX +marIX +marIX09+ visitIX09  + numberIX09 )/6
+
+* functional only*
+
+* inclusive model*
+local FUNSOCSUPTOT " helpIX socIX confideIX confmoreIX dsspIX rlosIX frprIX frwrIX  hobbyIX  feelIX helpIX09 socIX09 confideIX09 confmoreIX09 dsspIX09 rlosIX09 frprIX09 frwrIX09  hobbyIX09  feelIX09"
+egen funsocsupTOTinc = rmean(`STRSOCSUPTOT')
+* listwise delete*
+gen funsocsupTOT = (helpIX+ socIX+ confideIX+ confmoreIX + dsspIX+ rlosIX+ frprIX+ frwrIX+ helpIX09+ socIX09+ confideIX09+ confmoreIX09 + dsspIX09+ rlosIX09+ frprIX09+ frwrIX09+ hobbyIX + hobbyIX09 + feelIX+ feelIX09)/20
+
+* positive functional items *
+
+* inclusive model*
+local POSFUNTOT " helpIX socIX confideIX hobbyIX  feelIX helpIX09 socIX09 confideIX09 hobbyIX09  feelIX09"
+egen posfunTOTinc = rmean(`POSFUNTOT')
+* listwise delete*
+
+gen posfunTOT = ( helpIX+ socIX+ confideIX +helpIX09+ socIX09+ confideIX09 + hobbyIX + hobbyIX09 + feelIX+ feelIX09)/10
+
+* negative functional items *
+
+* inclusive model*
+local NEGFUNTOT "  confmoreIX dsspIX rlosIX frprIX frwrIX   confmoreIX09 dsspIX09 rlosIX09 frprIX09 frwrIX09  "
+egen negfunTOTinc = rmean(`NEGFUNTOT')
+* listwise delete*
+gen negfunTOT = ( dsspIX+ rlosIX+ frprIX+ frwrIX + dsspIX09+ rlosIX09+ frprIX09+ frwrIX09+ confmoreIX+ confmoreIX09)/10
+
+
+***** SPLITTING ALL THE SOC SUP VARIABLES INTO QUARTILES * they're non-normal, so they can be analysis here 
+foreach var of varlist socsupIX funsocsupIX strsocsupIX posfunIX negfunIX socsupIX09 funsocsupIX09 strsocsupIX09 posfunIX09 negfunIX09 socsupTOT funsocsupTOT strsocsupTOT posfunTOT negfunTOT {
+xtile `var'_Q = `var', nq(4)
+}
+
+************************
+*** HEALTH BEHAVIORS ******
+************************
+
+* exercise * 1= yes *
+recode exer (9=.)(2=0)
+
+recode EXER99X (7/88=.), gen(exer99)
+
+* have to have answered yes to exercvise for the followup questions so will exclude **
+
+* exercise - number of times made sweaty * 
+*recode exers (999=.)
+
+* exercise - number of times in last four weeks did sports vigouros activity * 
+*recode exern (999=.)
+
+
+*** exercise at 2009 ***
+clonevar exer09 = exer09x
+recode exer09 (777/999=.)
+
+
+** exercise in 199 and 2009 **
+
+gen exerTOT = .
+replace exerTOT = 0 if (exer09 ==0 & exer==0)
+replace exerTOT = 1 if (exer09 ==0 & exer ==1)
+replace exerTOT = 2 if (exer09 >=1 & exer==0)
+replace exerTOT = 3 if (exer09 >=1 & exer==1)
+
+label define exerTOT 0 "Never exercise" 1 "Exercise in 99 not 09" 2 "Exercise in 09 not 99" 3 "Exercise in 09 and 99"
+label values exerTOT exerTOT
+
+gen exerSUM = (exer99 + exer09)
+
+******* actiheart data **********
+
+recode acti_aee09 (-1=.),gen(acti)
+
+
+
+************************************************************************
+************************************************************************
+*** PERSON CENTRED METHODS OF OPERATIONALISING RESILIENCE********************************************
+************************************************************************
+************************************************************************
+
+* RESEARCHER DRIVEN - MEANS METHOD, i.e. look at those in the highest adversity tertile and highest adaptation tertile*
+
+
+*** SPLIT INTO TERTILES as per Masten 1999 Competence in the context of advesrity***
+*NB: highest functioning = tertile 3 *
+xtile wem3=WEMWBS09, nq(3)
+xtile wem10=WEMWBS09, nq(10)
+
+xtile cont3= contsum09 , nq(3)
+xtile cont2= contsum09 , nq(2)
+xtile cont10= contsum09 , nq(10)
+
+
+* make binary - resilient or not*
+gen res3BIN = .
+replace res3 = 1 if(cont3==1 & wem3==3)
+replace res3 = 0 if(cont3==2 & wem3==3)
+replace res3 = 0 if(cont3==3 & wem3==3)
+replace res3 = 0 if(cont3==1 & wem3==1)
+replace res3 = 0 if(cont3==2 & wem3==1)
+replace res3 = 0 if(cont3==3 & wem3==1)
+replace res3 = 0 if(cont3==1 & wem3==2)
+replace res3 = 0 if(cont3==2 & wem3==2)
+replace res3 = 0 if(cont3==3 & wem3==2)
+label define resilience 1 "Resilient" 0 "Non"
+label values res3BIN resilience
+
+*** split into Mastens four groups ***
+
+gen res3TER = .
+replace res3TER = 1 if(cont3==1 & wem3==3)
+replace res3TER = 4 if(cont3==1 & wem3==1)
+replace res3TER = 5 if(cont3==3 & wem3==1)
+replace res3TER = 2 if(cont3==3 & wem3==3)
+
+replace res3TER = 3 if(cont3==2 & wem3==3)
+replace res3TER = 3 if(cont3==2 & wem3==1)
+replace res3TER = 3 if(cont3==1 & wem3==2)
+replace res3TER = 3 if(cont3==2 & wem3==2)
+replace res3TER = 3 if(cont3==3 & wem3==2)
+label variable res3TER "Tertiles of resilience"
+label define resTER 1 "Resilient" 5 "Maladaptive" 4 "Highly vulnerable" 2 "Competent" 3 "Other"
+label values res3TER resTER
+
+* including all of the middle tertiles *
+gen res3TERall = .
+replace res3TERall = 1 if(cont3==1 & wem3==3)
+replace res3TERall = 2 if(cont3==1 & wem3==1)
+replace res3TERall = 3 if(cont3==3 & wem3==1)
+replace res3TERall = 4 if(cont3==3 & wem3==3)
+
+replace res3TERall = 5 if(cont3==2 & wem3==3)
+replace res3TERall = 6 if(cont3==2 & wem3==1)
+replace res3TERall = 7 if(cont3==1 & wem3==2)
+replace res3TERall = 8 if(cont3==2 & wem3==2)
+replace res3TERall = 9 if(cont3==3 & wem3==2)
+label variable res3TERall "All Tertiles of resilience"
+label define resTERall 1 "Resilient" 2 "Maladaptive" 3 "Highly vulnerable" 4 "Competent" 0 "Other" 5 "Low AD Mid PA" 6 "Mid AD Low PA" 7 "High AD Mid PA" 8 " Mid AD Mid PA" 9 "Mid AD High PA"
+label values res3TERall resTERall
+
+* using Masten's tertile grid, but with physical capability split as 10:80:10 *
+
+* generating 10:80:10 physical capibility split *
+recode cont10 (2/9=2)(10=3)
+
+gen res10 = .
+replace res10 = 1 if(cont10==1 & wem3==3)
+replace res10 = 4 if(cont10==1 & wem3==1)
+replace res10 = 5 if(cont10==3 & wem3==1)
+replace res10 = 2 if(cont10==3 & wem3==3)
+
+replace res10 = 3 if(cont10==2 & wem3==3)
+replace res10 = 3 if(cont10==2 & wem3==1)
+replace res10 = 3 if(cont10==1 & wem3==2)
+replace res10 = 3 if(cont10==2 & wem3==2)
+replace res10 = 3 if(cont10==3 & wem3==2)
+label variable res10 "10:80:10 physical capability - wb tertiles"
+label values res10 resTER
+
+gen res10BIN =.
+replace res10BIN = 1 if(res10==1)
+replace res10BIN = 0 if(res10>=2)
+
+* using Masten's tertile grid, but with physical capability & wellbeing split as 10:80:10 *
+
+* generating 10:80:10 wellbeing split *
+recode wem10 (2/9=2)(10=3)
+
+gen res1010 = .
+replace res1010 = 1 if(cont10==1 & wem10==3)
+replace res1010 = 4 if(cont10==1 & wem10==1)
+replace res1010 = 5 if(cont10==3 & wem10==1)
+replace res1010 = 2 if(cont10==3 & wem10==3)
+
+replace res1010 = 3 if(cont10==2 & wem10==3)
+replace res1010 = 3 if(cont10==2 & wem10==1)
+replace res1010 = 3 if(cont10==1 & wem10==2)
+replace res1010 = 3 if(cont10==2 & wem10==2)
+replace res1010 = 3 if(cont10==3 & wem10==2)
+label variable res1010 "10:80:10 physical capability & wb"
+label values res1010 resTER
+
+gen res1010BIN =.
+replace res1010BIN = 1 if(res1010==1)
+replace res1010BIN = 0 if(res1010>=2)
+
+* using Masten's tertile grid, but with physical capability as ADLS & wellbeing *
+
+gen resADL = .
+replace resADL = 1 if(ADLcount3==3 & wem3==3)
+replace resADL = 4 if(ADLcount3==3 & wem3==1)
+replace resADL = 5 if(ADLcount3==1 & wem3==1)
+replace resADL = 2 if(ADLcount3==1 & wem3==3)
+
+replace resADL = 3 if(ADLcount3==2 & wem3==3)
+replace resADL = 3 if(ADLcount3==2 & wem3==1)
+replace resADL = 3 if(ADLcount3==1 & wem3==2)
+replace resADL = 3 if(ADLcount3==2 & wem3==2)
+replace resADL = 3 if(ADLcount3==3 & wem3==2)
+label variable resADL "physical capability via ADL"
+label values resADL resTER
+
+
+************************************************************************
+************************************************************************
+*** VARIABLE CENTRED METHODS********************************************
+************************************************************************
+************************************************************************
+
+* linear regress * predict residuals *
+regress WEMWBS09 contsum09
+predict r, residual
+
+* gender stratified residuals *
+
+* men *
+regress WEMWBS09 contsum09 if(sex==1)
+predict rm if(sex==1), residual
+*women*
+regress WEMWBS09 contsum09 if(sex==2)
+predict rf if(sex==2), residual
+* joint *
+gen rmf = rm
+replace rmf = rf if(rm==.)
+
+* binary residuals * 
+gen rBIN = r
+recode rBIN (-100/0=0)(0/100=1)
+label variable rBIN "Residuals binary - resilience" 
+* tertile residuals *
+xtile r3=r, nq(3)
+
+
+* grouping based on 95% ci of residuals*
+ci r
+gen r95ci = r
+recode r95ci (-100/.3775263=0)(.3775264/1000=1)
+label values r95ci resilience
+* grouping based on 99% ci of residuals *
+ci r, level(99)
+gen r99ci = r
+recode r99ci (-100/.4963548=0)(.4963549/1000=1)
+label values r99ci resilience
+
+* grouping based on 95% ci of WEMWBS *
+
+ci WEMWBS09
+gen wem95ci = WEMWBS09
+recode wem95ci (-100/51.96717=0)(51.96717/1000=1)
+label values wem95ci resilience
+
+* grouping based on 99% ci of WEMWBS *
+ci WEMWBS09, level(99)
+gen wem99ci = WEMWBS09
+recode wem99ci (-100/52.07962=0)(52.07962/1000=1)
+label values wem99ci resilience
+
+* grouping based on different residual quantiles * 
+
+xtile r10= r , nq(10)
+
+recode r10 (1/2=1)(3/8=2)(9/10=3), gen(r206020)
+recode r10 (1=1)(2/9=2)(10=3), gen(r108010)
+
+* quintilies of resiliecne * 
+xtile r5= r , nq(5)
+
+
+* looking at positive and negative residuals *
+gen rpos = r if(r>=0)
+gen rneg = r if(r<=0)
+
+*splitting into quartiles*
+xtile rpos4 = rpos, nq(4)
+xtile rneg4 = rneg, nq(4)
+
+
+*************************************
+** Looking at both categorical methods' resilient groups * 
+
+gen catBIN = .
+replace catBIN = 1 if(res3BIN==1 & rBIN==1)
+replace catBIN = 0 if(res3BIN==0 & rBIN==1)
+label variable catBIN "Categorical resilient groups comparison"
+label define catBIN 1 "Cat residuals and thresholds" 0 "Cat residuals only"
+label values catBIN catBIN
+
+
+*****************************
+********* MISSING  **********
+*****************************
+
+gen miss = .
+replace miss = 0 if(r!=.)
+replace miss = 1 if(r==.)
+label variable miss "Missing"
+label define miss 1 "Missing" 0 "Non-missing"
+label values miss miss
+
+* missing in the resilience analysis *
+gen missr = .
+replace missr = 1 if(miss==1 & (WEMWBS!=. | contsum09!=.))
+replace missr = 0 if(miss==0 & (WEMWBS!=. | contsum09!=.))
+
+* missing WEMWBS *
+
+gen missWEMWBS =.
+replace missWEMWBS = 1 if(WEMWBS==. & contsum09!=.)
+replace missWEMWBS = 0 if(WEMWBS!=. & contsum09!=.)
+
+* missing phys capability  *
+
+gen missPHYSCAP =.
+replace missPHYSCAP = 1 if(WEMWBS!=. & contsum09==.)
+replace missPHYSCAP = 0 if(WEMWBS!=. & contsum09!=.)
+
+* missing exer data *
+
+gen exer99MISS = .
+replace exer99MISS = 1 if(r!=. & exer99==.)
+replace exer99MISS = 0 if(r!=. & exer99!=.)
+gen exer09MISS = .
+replace exer09MISS = 1 if(r!=. & exer09==.)
+replace exer09MISS = 0 if(r!=. & exer09!=.)
+
+********************************************************************************************************
+*** TESTING INTERACTIONS *******************************************************************************
+********************************************************************************************************
+
+
+regress r sex##c.sep
+regress r sex##c.educ26g
+
+********************************************************************************************************
+*** TESTING TRENDS IN RESILIENCE BY SOCIOECONOMIC INDICATOR *******************************************************************************
+********************************************************************************************************
+
+
+nptrend r, by(sep)
+nptrend r if sex==1, by(sep)
+nptrend r if sex==2, by(sep)
+nptrend r, by(educ26g)
+nptrend r if sex==2, by(educ26g)
+nptrend r if sex==1, by(educ26g)
+nptrend r, by(educ26g)
+nptrend r, by(sm)
+nptrend r if sex==1, by(sm)
+nptrend r if sex==2, by(sm)
+nptrend r, by(FAsep)
+nptrend r if sex==2, by(FAsep)
+nptrend r if sex==1, by(FAsep)
+nptrend r, by(FAedu)
+nptrend r if sex==1, by(FAedu)
+nptrend r if sex==2, by(FAedu)
+
+
+
