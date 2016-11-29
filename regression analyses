@@ -1,0 +1,20 @@
+
+* resilience variable * 
+sem ( contsum09 -> WEMWBS, )  if(r!=.), method(mlmv) nocapslatent
+
+* res and participant education * 
+sem ( sex educ26g -> r, )  if(r!=.), method(mlmv) nocapslatent
+
+* res and father edu *
+sem ( sex FAedu -> r, )  if(r!=.), method(mlmv) nocapslatent
+
+* res and mother edu * 
+sem ( sex MAedu -> r, )  if(r!=.), method(mlmv) nocapslatent
+
+* res and participant sep * 
+sem ( sex sep -> r, )  if(r!=.), method(mlmv) nocapslatent
+
+* res and household sep * 
+sem ( sex FAsep -> r, )  if(r!=.), method(mlmv) nocapslatent
+sem ( sex sm -> r, )  if(r!=.), method(mlmv) nocapslatent
+
