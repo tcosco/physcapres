@@ -808,6 +808,8 @@ foreach var of varlist socsupIX funsocsupIX strsocsupIX posfunIX negfunIX socsup
 xtile `var'_Q = `var', nq(4)
 }
 
+xtile ssSUM4 = socsupSUM, nq(4)
+
 ************************
 *** HEALTH BEHAVIORS ******
 ************************
@@ -843,6 +845,7 @@ label define exerTOT 0 "Never exercise" 1 "Exercise in 99 not 09" 2 "Exercise in
 label values exerTOT exerTOT
 
 gen exerSUM = (exer99 + exer09)
+xtile exerSUM4 = exerSUM, nq(4)
 
 ******* actiheart data **********
 
