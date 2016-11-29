@@ -4,7 +4,7 @@
 
 * exerSUM = sum of exercise vaariables for 53 (exer99x) and 60-64 (exer09x) *
 
-sem (sep -> r, ) (sep -> exerSUM, ) (sex exerSUM -> r, ) if(r!=.), method(mlmv) nocapslatent
+sem (sex sep -> r, ) (sep -> exerSUM, ) (exerSUM -> r, ) if(r!=.), method(mlmv) nocapslatent
 estat gof, stats(all)
 estat teffects
 
