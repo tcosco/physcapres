@@ -498,7 +498,7 @@ recode frfg99 (6/9=.)(3=100)(2=66.66666)(1=33.33333), gen(feelIX)
 
 recode dssp (2=1)(1=0)(3/9=.), gen(dsspIX)
 recode dsspIX (1=100)
-replace dsspIX = 100 if(marstat==0)
+replace dsspIX = 100 if(marstat1==0)
 
 * lost contact wiuthg a close friend/relative * 1= no *
 
