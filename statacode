@@ -463,12 +463,12 @@ recode marstat1 (1=100), gen(marIX)
 
 recode frndh (9=.), gen(helpfr)
 
-recode helpfr (4=100)(3=66.66666)(2=33.333333)(1=0), gen(helpIX)
+recode helpfr (4=100)(3=66.66666)(2=33.333333)(1=0)(7=.), gen(helpIX)
 
 
 ** 	Overall do you wish that you had more of a SOICIAL LIFE, or are thing about right for you, or would you prefer to see less of people? *
 
-recode frndm (9=.), gen(soclife)
+recode frndm (7/9=.), gen(soclife)
 
 recode soclife (2=100)(1=0)(3=0), gen(socIX)
 
@@ -631,14 +631,14 @@ recode numberfr09 (6/9=.)(5=100)(4=75)(3=50)(2=25)(1=0), gen (numberIX09)
 
 ** 	Do you think that you have friends, neighbours or relatives who would HELP you out if a problem or crisis came up? * 
 
-recode FRNDH09 (9=.), gen(helpfr09)
+recode FRNDH09 (7/9=.), gen(helpfr09)
 
 recode helpfr09 (4=100)(3=66.66666)(2=33.333333)(1=0), gen(helpIX09)
 
 
 ** 	Overall do you wish that you had more of a SOICIAL LIFE, or are thing about right for you, or would you prefer to see less of people? *
 
-recode FRNDM09 (9=.), gen(soclife09)
+recode FRNDM09 (7/9=.), gen(soclife09)
 
 recode soclife09 (2=100)(1=0)(3=0), gen(socIX09)
 
