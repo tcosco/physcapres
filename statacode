@@ -810,6 +810,11 @@ xtile `var'_Q = `var', nq(4)
 
 xtile ssSUM4 = socsupSUM, nq(4)
 
+
+******** CONVERTING ALL SOCIAL SUPPORT CUMULATIVE SCORES TO Z SCORES *******
+
+zscore socsupSUM strsocsupSUM funsocsupSUM posfunSUM negfunSUM
+
 ************************
 *** HEALTH BEHAVIORS ******
 ************************
