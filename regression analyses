@@ -14,6 +14,7 @@ sem ( sex MED -> r, )  if(r!=.), method(mlmv) nocapslatent
 * res and participant sep * 
 sem ( sex sep -> r, )  if(r!=.), method(mlmv) nocapslatent
 
+
 * res and household sep * 
 sem ( sex FAsep -> r, )  if(r!=.), method(mlmv) nocapslatent
 sem ( sex sm -> r, )  if(r!=.), method(mlmv) nocapslatent
