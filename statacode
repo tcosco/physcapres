@@ -536,15 +536,15 @@ replace confmoreIX = 0 if(frcd99==0)
 *total*
 
 * inclusive model*
-local SOCSUP99 " contactIX visitIX  numberIX helpIX socIX confideIX confmoreIX  marIX dsspIX rlosIX frprIX frwrIX  hobbyIX  feelIX"
+local SOCSUP99 "  visitIX  numberIX helpIX socIX confideIX confmoreIX  marIX dsspIX rlosIX frprIX frwrIX  hobbyIX  feelIX"
 egen socsupIXinc = rmean(`SOCSUP99')
 * listwise delete*
-gen socsupIX = (contactIX + visitIX+  numberIX+ helpIX+ socIX+ confideIX+ confmoreIX + marIX+ dsspIX+ rlosIX+ frprIX+ frwrIX + hobbyIX + feelIX)/13
+gen socsupIX = ( visitIX+  numberIX+ helpIX+ socIX+ confideIX+ confmoreIX + marIX+ dsspIX+ rlosIX+ frprIX+ frwrIX + hobbyIX + feelIX)/13
 
 * structural only *
 
 * inclusive model*
-local STRSOCSUP99 "visitIX  numberIX marIX contactIX"
+local STRSOCSUP99 "visitIX  numberIX marIX "
 egen strsocsupIXinc = rmean(`STRSOCSUP99')
 * listwise delete*
 gen strsocsupIX = (visitIX  + numberIX +marIX)/3
