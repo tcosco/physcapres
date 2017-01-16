@@ -5,11 +5,13 @@
 * exerSUM = sum of exercise vaariables for 53 (exer99x) and 60-64 (exer09x) *
 
 sem (sex sep -> r, ) (sep -> exerSUM, ) (exerSUM -> r, ) if(r!=.), method(mlmv) nocapslatent
-estat gof, stats(all)
 estat teffects
+estat gof, stats(all)
+
 
 * socsupSUM = sum of social support indices  for 53  and 60-64  *
 
 sem (sex sep -> r, ) (sex sep -> socsupSUM, ) (sex socsupSUM -> r, ) if(r!=.), method(mlmv) nocapslatent
 estat teffects
+estat gof, stats(all)
 
