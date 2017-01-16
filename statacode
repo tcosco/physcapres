@@ -423,7 +423,7 @@ xtile ADLcount3= ADLcount , nq(3)
 
 clonevar visitfr = frndc
 
-recode visitfr (6/9=.)(5=100)(4=80)(3=60)(2=40)(1=20), gen (visitIX)
+recode visitfr (6/9=.)(5=100)(4=75)(3=50)(2=25)(1=0), gen (visitIX)
 replace visitIX = 0 if(frndc1==2)
 
 * Are there any relatives or friends with whom you have regular contact, either by visit, telephone or letters? *
@@ -594,7 +594,7 @@ gen negfunIX = ( dsspIX+ rlosIX+ frprIX+ frwrIX + confmoreIX)/5
 
 clonevar visitfr09 = FRNDC09
 
-recode visitfr09 (6/9=.)(5=100)(4=80)(3=60)(2=40)(1=20), gen (visitIX09)
+recode visitfr09 (6/9=.)(5=100)(4=75)(3=50)(2=25)(1=0), gen (visitIX09)
 replace visitIX09 = 0 if(FRNDC109==2)
 
 * Are there any relatives or friends with whom you have regular contact, either by visit, telephone or letters? *
